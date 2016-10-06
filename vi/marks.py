@@ -12,8 +12,8 @@ class Marks(object):
     def add(self, name, view):
         # TODO: support multiple selections
         # TODO: Use id attribute; references might change.
-        win, view, rowcol = view.window(), view, view.rowcol(view.sel()[0].b)
-        _MARKS[name] = win, view, rowcol
+        win, view, rowcol, viewport_pos = view.window(), view, view.rowcol(view.sel()[0].b), view.viewport_position()
+        _MARKS[name] = win, view, rowcol, viewport_pos
 
     def get_as_encoded_address(self, name, exact=False):
         '''Returns an address for the mark @name.
@@ -28,7 +28,7 @@ class Marks(object):
             # Special case: '' motion
             return '<command _vi_double_single_quote>'
 
-        win, view, rowcol = _MARKS.get(name, (None,) * 3)
+        win, view, rowcol, viewport_pos = _MARKS.get(name, (None,) * 4)
         if win:
             if exact:
                 rowcol_encoded = ':'.join(str(i) for i in rowcol)
@@ -41,11 +41,11 @@ class Marks(object):
             if view and view.view_id == self.state.view.view_id:
                 if not exact:
                     rowcol = (rowcol[0], 0)
-                return sublime.Region(view.text_point(*rowcol))
+                return (sublime.Region(view.text_point(*rowcol)), viewport_pos)
             else:
                 # FIXME: Remove buffers when they are closed.
                 if fname:
-                    return "{0}:{1}".format(fname, rowcol_encoded)
+                    return ("{0}:{1}".format(fname, rowcol_encoded), viewport_pos)
                 else:
-                    return "<untitled {0}>:{1}".format(view.buffer_id(), rowcol_encoded)
+                    return ("<untitled {0}>:{1}".format(view.buffer_id(), rowcol_encoded), viewport_pos)
 

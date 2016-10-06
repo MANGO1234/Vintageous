@@ -1318,7 +1318,7 @@ class _vi_quote(ViTextCommandBase):
             return s
 
         state = self.state
-        address = state.marks.get_as_encoded_address(character)
+        (address, viewport_pos) = state.marks.get_as_encoded_address(character)
 
         if address is None:
             return
@@ -1326,9 +1326,11 @@ class _vi_quote(ViTextCommandBase):
         if isinstance(address, str):
             if not address.startswith('<command'):
                 self.view.window().open_file(address, sublime.ENCODED_POSITION)
+                self.view.set_viewport_position(viewport_pos)
             else:
                 # We get a command in this form: <command _vi_double_quote>
                 self.view.run_command(address.split(' ')[1][:-1])
+                self.view.set_viewport_position(viewport_pos)
             return
 
         regions_transformer(self.view, f)
@@ -1359,7 +1361,7 @@ class _vi_backtick(ViTextCommandBase):
             return s
 
         state = self.state
-        address = state.marks.get_as_encoded_address(character, exact=True)
+        (address, viewport_pos) = state.marks.get_as_encoded_address(character, exact=True)
 
         if address is None:
             return
@@ -1367,10 +1369,12 @@ class _vi_backtick(ViTextCommandBase):
         if isinstance(address, str):
             if not address.startswith('<command'):
                 self.view.window().open_file(address, sublime.ENCODED_POSITION)
+                self.view.set_viewport_position(viewport_pos)
             return
 
         # This is a motion in a composite command.
         regions_transformer(self.view, f)
+        self.view.set_viewport_position(viewport_pos)
 
 
 class _vi_quote_quote(IrreversibleTextCommand):
