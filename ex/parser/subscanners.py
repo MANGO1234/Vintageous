@@ -14,6 +14,7 @@ from .scanner_command_cquit import scan_command_cquit
 from .scanner_command_delete import scan_command_delete
 from .scanner_command_double_ampersand import scan_command_double_ampersand
 from .scanner_command_edit import scan_command_edit
+from .scanner_command_execute_command import scan_command_execute_command
 from .scanner_command_exit import scan_command_exit
 from .scanner_command_file import scan_command_file
 from .scanner_command_global import scan_command_global
@@ -61,6 +62,7 @@ patterns = OrderedDict()
 # TODO: compile regexes. ??
 # IMPORTANT: Order matters.
 patterns[r'!(?=.+)'] = scan_command_shell_out
+patterns[r'sublime (?=.+)'] = scan_command_execute_command
 patterns[r'&&?'] = scan_command_double_ampersand
 patterns[r'ab(?:breviate)?'] = scan_command_abbreviate
 patterns[r'bro(?:wse)?'] = scan_command_browse

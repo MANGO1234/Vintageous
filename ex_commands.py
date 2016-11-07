@@ -2,6 +2,7 @@ import os
 import re
 import stat
 import subprocess
+import json
 
 import sublime
 import sublime_plugin
@@ -168,7 +169,7 @@ class ExShellOut(sublime_plugin.TextCommand):
         shell_cmd = parsed.command.command
 
         if shell_cmd == '!':
-            if not _last_command:
+            if not ExShellOut._last_command:
                 return
             shell_cmd = ExShellOut._last_command
 
@@ -198,6 +199,30 @@ class ExShellOut(sublime_plugin.TextCommand):
                 self.view.window().run_command("show_panel", {"panel": "output.vi_out"})
         except NotImplementedError:
             show_not_implemented()
+
+
+class ExExecuteCommandCommand(sublime_plugin.TextCommand):
+    """
+    Command: :sublime{command} {argument}
+
+    non standard to execute a sublime command
+    """
+
+    @changing_cd
+    def run(self, edit, command_line=''):
+        assert command_line, 'expected non-empty command line'
+        parsed = parse_command_line(command_line)
+
+        cmd = parsed.command.command
+        args = parsed.command.arguments
+
+        try:
+            ob = json.loads('{}')
+            if not args is None:
+                ob = json.loads(args)
+            self.view.window().run_command(cmd, ob)
+        except ValueError:
+            show_message('Argument not json')
 
 
 class ExShell(ViWindowCommandBase):
